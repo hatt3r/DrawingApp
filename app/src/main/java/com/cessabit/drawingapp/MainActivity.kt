@@ -1,22 +1,48 @@
 package com.cessabit.drawingapp
 
-import android.annotation.SuppressLint
+
 import android.app.Dialog
-import android.media.Image
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
+
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
+import android.Manifest
+import android.app.AlertDialog
+import androidx.core.app.ActivityCompat
 
 class MainActivity : AppCompatActivity() {
 
     private var drawingView: DrawingView? = null
     private var mImageCurrentPaint: ImageButton? = null
+    val requestPermission: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
+                val permissionName = it.key
+                val isGranted = it.value
+                if (isGranted) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Permission granted now you can read the storage files.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    if (permissionName == Manifest.permission.READ_EXTERNAL_STORAGE) {
+                        Toast.makeText(
+                            this,
+                            "you just denied permission",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +50,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         drawingView = findViewById(R.id.drawing_view)
         drawingView?.setSizeForBrush(20.toFloat())
+
+        val ibGallery: ImageButton = findViewById(R.id.ib_gallery)
+        ibGallery.setOnClickListener {
+            requestStoragePermission()
+
+        }
+
 
         val linearLayoutPaintColors = findViewById<LinearLayout>(R.id.ll_paint_colors)
         mImageCurrentPaint = linearLayoutPaintColors[1] as ImageButton
@@ -37,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         ib_brush.setOnClickListener {
             showBrushSizeChooserDialog()
         }
+
     }
 
     private fun showBrushSizeChooserDialog() {
@@ -84,5 +118,36 @@ class MainActivity : AppCompatActivity() {
             mImageCurrentPaint = view
         }
     }
+
+    private fun requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        ) {
+            showRationaleDialog(
+                "Drawing App",
+                "Drawing App" + "needs to access your external storage."
+            )
+
+        }else
+        {
+            requestPermission.launch((arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)))
+            //TODO - add writing external storage permission
+        }
+    }
+
+    private fun showRationaleDialog(
+        title: String, message: String,
+    ) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+        builder.create().show()
+    }
+
 
 }
