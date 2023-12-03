@@ -16,6 +16,9 @@ import androidx.core.view.get
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.provider.MediaStore
 import android.widget.ImageView
 import androidx.core.app.ActivityCompat
@@ -75,9 +78,11 @@ class MainActivity : AppCompatActivity() {
 
         }
         val ibUndo: ImageButton = findViewById(R.id.ib_undo)
-        ibUndo.setOnClickListener{
+        ibUndo.setOnClickListener {
             drawingView?.onClickUndo()
         }
+        val ibSave: ImageButton = findViewById(R.id.ib_save)
+        ibSave.setOnClickListener {}
 
         val linearLayoutPaintColors = findViewById<LinearLayout>(R.id.ll_paint_colors)
         mImageCurrentPaint = linearLayoutPaintColors[1] as ImageButton
@@ -155,6 +160,25 @@ class MainActivity : AppCompatActivity() {
             requestPermission.launch((arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)))
             //TODO - add writing external storage permission
         }
+    }
+
+    private fun getBitmapFromView(view: View): Bitmap {
+        val returnedBitmap = Bitmap.createBitmap(
+            view.width,
+            view.height, Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(returnedBitmap)
+        val bgDrawable = view.background
+        if(bgDrawable!=null)
+        {
+            bgDrawable.draw(canvas)
+        }
+        else
+        {
+            canvas.drawColor(Color.WHITE)
+        }
+        view.draw(canvas)
+        return returnedBitmap
     }
 
     private fun showRationaleDialog(
