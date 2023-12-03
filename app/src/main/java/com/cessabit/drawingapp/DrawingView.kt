@@ -22,9 +22,17 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     private var color = Color.BLACK
     private var canvas: Canvas? = null
     private var mPaths = ArrayList<CustomPath>()
+    private val mUndoPath = ArrayList<CustomPath>()
 
     init {
         setUpDrawing()
+    }
+
+    fun onClickUndo() {
+        if (mPaths.size > 0) {
+            mUndoPath.add(mPaths.removeAt(mPaths.size - 1))
+            invalidate()
+        }
     }
 
     private fun setUpDrawing() {
@@ -47,12 +55,11 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     //change canvas to canvas? if fails
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        mCanvasBitmap?.let{ canvas.drawBitmap(mCanvasBitmap!!, 0f, 0f, mCanvasPaint) }
-        for(path in mPaths)
-        {
+        mCanvasBitmap?.let { canvas.drawBitmap(mCanvasBitmap!!, 0f, 0f, mCanvasPaint) }
+        for (path in mPaths) {
             mDrawPaint!!.strokeWidth = path.brushThickness
             mDrawPaint!!.color = path.color
-            canvas.drawPath(path,mDrawPaint!!)
+            canvas.drawPath(path, mDrawPaint!!)
         }
         if (!mDrawPath!!.isEmpty) {
             mDrawPaint!!.strokeWidth = mDrawPath!!.brushThickness
@@ -87,16 +94,19 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         return true
 
     }
-    fun setSizeForBrush(newSize:Float)
-    {
-        mBrushSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,newSize,resources.displayMetrics)
+
+    fun setSizeForBrush(newSize: Float) {
+        mBrushSize = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            newSize,
+            resources.displayMetrics
+        )
 
         mDrawPaint!!.strokeWidth = mBrushSize
     }
 
 
-    fun setColor(newColor: String)
-    {
+    fun setColor(newColor: String) {
         color = Color.parseColor(newColor)
         mDrawPaint!!.color = color
     }

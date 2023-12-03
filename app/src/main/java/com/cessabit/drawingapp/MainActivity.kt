@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     val openGalleryLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK && result.data != null){
+            if (result.resultCode == RESULT_OK && result.data != null) {
                 val imageBackGround: ImageView = findViewById(R.id.iv_background)
                 imageBackGround.setImageURI(result.data?.data)
             }
@@ -74,7 +74,10 @@ class MainActivity : AppCompatActivity() {
             requestStoragePermission()
 
         }
-
+        val ibUndo: ImageButton = findViewById(R.id.ib_undo)
+        ibUndo.setOnClickListener{
+            drawingView?.onClickUndo()
+        }
 
         val linearLayoutPaintColors = findViewById<LinearLayout>(R.id.ll_paint_colors)
         mImageCurrentPaint = linearLayoutPaintColors[1] as ImageButton
