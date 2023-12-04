@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     private var drawingView: DrawingView? = null
     private var mImageCurrentPaint: ImageButton? = null
-
+    var customProgressDialog: Dialog? = null
     val openGalleryLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity() {
         }
         val ibSave: ImageButton = findViewById(R.id.ib_save)
         ibSave.setOnClickListener {
-            if(isReadStorageAllowed())
-            {
+            if (isReadStorageAllowed()) {
+                showProgressDialog()
                 lifecycleScope.launch {
                     val flDrawingView: FrameLayout = findViewById(R.id.fl_drawing_view_container)
                     saveBitmapFile(getBitmapFromView(flDrawingView))
@@ -159,8 +159,10 @@ class MainActivity : AppCompatActivity() {
             mImageCurrentPaint = view
         }
     }
-    private fun isReadStorageAllowed(): Boolean{
-        val result = ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)
+
+    private fun isReadStorageAllowed(): Boolean {
+        val result =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
 
         return result == PackageManager.PERMISSION_GRANTED
     }
@@ -215,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                     fo.close()
                     result = f.absolutePath
                     runOnUiThread {
+                        cancelProgressDialaog()
                         if (result.isNotEmpty()) {
                             Toast.makeText(
                                 this@MainActivity,
@@ -247,4 +250,18 @@ class MainActivity : AppCompatActivity() {
         }
         builder.create().show()
     }
+
+    private fun showProgressDialog() {
+        customProgressDialog = Dialog(this@MainActivity)
+        customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+        customProgressDialog?.show()
+    }
+
+    private fun cancelProgressDialaog() {
+        if (customProgressDialog != null) {
+            customProgressDialog?.dismiss()
+            customProgressDialog = null
+        }
+    }
+
 }
